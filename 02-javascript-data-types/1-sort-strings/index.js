@@ -15,6 +15,6 @@ function sortArray(a, b) {
   } else if (a.toLowerCase() === b.toLowerCase() && a < b) {
     return -1;
   } else {
-    return a.localeCompare(b);
+    return a.localeCompare(b, ['ru', 'en']);
   }
 }
