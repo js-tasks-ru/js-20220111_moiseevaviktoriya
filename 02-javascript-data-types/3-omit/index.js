@@ -5,14 +5,11 @@
  * @returns {object} - returns the new object
  */
 export const omit = (obj, ...fields) => {
-  let omittedObj;
   let entries = Object.entries(obj);
 
   let omittedEntries = entries.filter(entry => {
-    return fields.indexOf(entry[0]) === -1;
+    return !fields.includes(entry[0]);
   });
 
-  omittedObj = Object.fromEntries(omittedEntries);
-
-  return omittedObj;
+  return Object.fromEntries(omittedEntries);
 };
