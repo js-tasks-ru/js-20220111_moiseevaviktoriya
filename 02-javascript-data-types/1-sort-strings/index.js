@@ -5,16 +5,16 @@
  * @returns {string[]}
  */
 export function sortStrings(arr, param = 'asc') {
-  let arrCopy = arr.slice().sort(sortArray);
-  return param === 'asc' ? arrCopy : arrCopy.reverse();
+  const locales = ['ru', 'en'];
+  const options = {
+    caseFirst: 'upper',
+  };
+
+  return arr.slice().sort((a, b) => {
+    return param === 'asc' ?
+      a.localeCompare(b, locales, options)
+      :
+      b.localeCompare(a, locales, options);
+  });
 }
 
-function sortArray(a, b) {
-  if (a.toLowerCase() === b.toLowerCase() && a > b) {
-    return 1;
-  } else if (a.toLowerCase() === b.toLowerCase() && a < b) {
-    return -1;
-  } else {
-    return a.localeCompare(b, ['ru', 'en']);
-  }
-}
