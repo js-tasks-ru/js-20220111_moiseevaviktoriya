@@ -4,8 +4,6 @@ export default class ColumnChart {
   element;
   isLoading = true;
 
-
-
   constructor(options) {
     this.data = options?.data || [];
     this.label = options?.label || '';
@@ -35,15 +33,11 @@ export default class ColumnChart {
 
   render() {
     const element = document.createElement('div');
-
     element.innerHTML = this.getTemplate();
-
     this.element = element.firstElementChild;
-
     this.bodyChart = element.querySelector('.column-chart__chart');
 
     this.chartsLoaded();
-
     this.renderChartElements();
   }
 
@@ -64,7 +58,6 @@ export default class ColumnChart {
         this.element.classList.remove('column-chart_loading');
       }
     }, 2000);
-
   }
 
   getChartElements() {
@@ -76,7 +69,7 @@ export default class ColumnChart {
       let value = String(Math.floor(item * scale));
       return `<div style="--value: ${value}" data-tooltip=${percent}></div>`;
     });
-
+    
     return chartElements.join('');
   }
 
