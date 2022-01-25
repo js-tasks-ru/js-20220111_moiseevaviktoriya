@@ -9,7 +9,7 @@ export default class ColumnChart {
     this.label = options?.label || '';
     this.value = options?.value || 0;
     this.link = options?.link || '';
-    this.formatHeading = options?.formatHeading || null;
+    this.formatHeading = options?.formatHeading || ((data) => data);
 
     this.render();
   }
@@ -20,7 +20,7 @@ export default class ColumnChart {
         <div class="column-chart__title">
           Total ${this.label} ${this.getLink()}
         </div>
-        
+
         <div class="column-chart__container">
           <div data-element="header" class="column-chart__header">
             ${this.formatHeading ? this.formatHeading(this.value) : this.value}
@@ -52,24 +52,22 @@ export default class ColumnChart {
   }
 
   chartsLoaded() {
-    setTimeout(() => {
-      if (this.data.length) {
-        this.isLoading = false;
-        this.element.classList.remove('column-chart_loading');
-      }
-    }, 2000);
+    if (this.data.length) {
+      this.isLoading = false;
+      this.element.classList.remove('column-chart_loading');
+    }
   }
 
   getChartElements() {
     const maxValue = Math.max(...this.data);
     const scale = this.chartHeight / maxValue;
 
-    let chartElements = this.data.map(item => {
+    const chartElements = this.data.map(item => {
       let percent = (item / maxValue * 100).toFixed(0) + '%';
       let value = String(Math.floor(item * scale));
       return `<div style="--value: ${value}" data-tooltip=${percent}></div>`;
     });
-    
+
     return chartElements.join('');
   }
 
@@ -83,6 +81,6 @@ export default class ColumnChart {
 
   update(newData) {
     this.data = newData;
-    setTimeout(() => this.renderChartElements(), 2000);
+    this.renderChartElements();
   }
 }
