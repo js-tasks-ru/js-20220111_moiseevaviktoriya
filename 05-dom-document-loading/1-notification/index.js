@@ -9,7 +9,7 @@ export default class NotificationMessage {
     this.message = message;
     this.duration = duration;
     this.type = type;
-
+    
     this.render();
   }
 
@@ -27,7 +27,9 @@ export default class NotificationMessage {
     this.constructor.activeElement = this.element;
     target.append(this.element);
 
-    this.destroy();
+    setTimeout(() => {
+      this.remove();
+    }, this.duration);
   }
 
   getTemplate() {
@@ -45,13 +47,10 @@ export default class NotificationMessage {
   }
 
   destroy() {
-    setTimeout(() => {
-      this.remove();
-    }, this.duration);
+    this.element.remove();
   }
 
   remove() {
     this.element.remove();
-    this.constructor.activeElement.remove();
   }
 }
