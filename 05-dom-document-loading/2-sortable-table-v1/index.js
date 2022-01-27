@@ -1,8 +1,9 @@
 export default class SortableTable {
   element;
   subElements;
-  sortField;
-  orderValue;
+  activeField;
+  arrow = `<span class="sort-arrow"></span>`;
+
 
   constructor(headerConfig = [], data = []) {
     this.headerConfig = headerConfig;
@@ -25,13 +26,12 @@ export default class SortableTable {
             <div data-element="header" class="sortable-table__header sortable-table__row">
                 ${this.getHeaderItems()}
             </div>
-            
+
             <div data-element="body" class="sortable-table__body">
                 ${this.getBodyItems()}
             </div>
         </div>
-    </div>
-    `;
+    </div>`;
   }
 
   getSubElements() {
@@ -60,7 +60,6 @@ export default class SortableTable {
       return HeaderItems.join('');
     }
   }
-
 
   getBodyItems() {
     if (this.data.length) {
@@ -94,17 +93,66 @@ export default class SortableTable {
   }
 
   sort(fieldValue, orderValue) {
-    const arrow = `
-        <span class="sort-arrow"></span>
-      `;
-    const activeField = this.subElements.header.querySelector("[data-id=" + fieldValue + "]");
+    this.getActiveSortElement(fieldValue, orderValue);
 
+    const directions = {
+      asc: 1,
+      desc: -1
+    };
+
+    const direction = directions[orderValue];
+
+    const sortType = this.headerConfig.find(item => {
+      return item.id === fieldValue;
+    }).sortType;
+
+
+    switch (sortType) {
+    case 'string':
+      this.sortByStingValue(fieldValue, direction);
+      break;
+
+    case 'number':
+      this.sortByNumValue(fieldValue, direction);
+      break;
+
+    case 'date':
+      break;
+    }
   }
 
-  update() {
+  getActiveSortElement(fieldValue, orderValue) {
 
+    if (this.activeField) {
+      this.activeField.children[1].innerHTML = '';
+      this.activeField = null;
+    }
+
+    this.activeField = this.subElements.header.querySelector("[data-id=" + fieldValue + "]");
+    this.activeField.dataset.order = orderValue;
+    this.activeField.children[1].innerHTML = this.arrow;
   }
 
+  sortByStingValue(fieldValue, direction) {
+    const sortedData = [...this.data].sort((a, b) => {
+      return direction * a[fieldValue].localeCompare(b[fieldValue], ['ru', 'en'], {caseFirst: 'upper'});
+    });
+
+    this.update(sortedData);
+  }
+
+  sortByNumValue(fieldValue, direction) {
+    const sortedData = [...this.data].sort((a, b) => {
+      return direction * (a[fieldValue] - b[fieldValue]);
+    });
+
+    this.update(sortedData);
+  }
+
+  update(newData) {
+    this.data = newData;
+    this.subElements.body.innerHTML = this.getBodyItems();
+  }
 
   destroy() {
     this.element.remove();
