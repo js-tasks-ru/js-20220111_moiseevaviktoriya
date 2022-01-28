@@ -9,7 +9,7 @@ export default class NotificationMessage {
     this.message = message;
     this.duration = duration;
     this.type = type;
-    
+
     this.render();
   }
 
@@ -20,11 +20,11 @@ export default class NotificationMessage {
   }
 
   show(target = document.body) {
-    if (this.constructor.activeElement) {
-      this.constructor.activeElement.remove();
+    if (NotificationMessage.activeElement) {
+      NotificationMessage.activeElement.remove();
     }
 
-    this.constructor.activeElement = this.element;
+    NotificationMessage.activeElement = this.element;
     target.append(this.element);
 
     setTimeout(() => {

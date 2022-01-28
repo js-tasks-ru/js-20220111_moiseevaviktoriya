@@ -48,7 +48,7 @@ export default class SortableTable {
 
   getHeaderItems() {
     if (this.headerConfig.length) {
-      const HeaderItems = this.headerConfig.map(item => {
+      const headerItems = this.headerConfig.map(item => {
         return `
           <div class="sortable-table__cell" data-id="${item.id}" data-sortable="${item.sortable}">
             <span>${item.title}</span>
@@ -57,13 +57,13 @@ export default class SortableTable {
         `;
       });
 
-      return HeaderItems.join('');
+      return headerItems.join('');
     }
   }
 
   getBodyItems() {
     if (this.data.length) {
-      const BodyItems = this.data.map(product => {
+      const bodyItems = this.data.map(product => {
         return `
           <a href="/products/${product.id}" class="sortable-table__row">
             ${this.getBodyItemData(product)}
@@ -71,24 +71,23 @@ export default class SortableTable {
         `;
       });
 
-      return BodyItems.join('');
+      return bodyItems.join('');
     }
   }
 
   getBodyItemData(product) {
     if (this.headerConfig.length) {
-      const BodyItemData = this.headerConfig.map(item => {
-        if (item.id === 'images') {
+      const bodyItemData = this.headerConfig.map(item => {
+        if (item.template) {
           return item.template(product.images);
         } else {
           return `
             <div class="sortable-table__cell">${product[item.id]}</div>
           `;
         }
-
       });
 
-      return BodyItemData.join('');
+      return bodyItemData.join('');
     }
   }
 
