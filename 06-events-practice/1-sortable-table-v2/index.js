@@ -2,7 +2,6 @@ export default class SortableTable {
   element;
   subElements;
   activeField;
-  activeOrder;
   arrow = `<span class="sort-arrow"></span>`;
 
   constructor(headersConfig, {
@@ -52,7 +51,6 @@ export default class SortableTable {
       const name = subElement.dataset.element;
       result[name] = subElement;
     }
-
     return result;
   }
 
@@ -112,13 +110,30 @@ export default class SortableTable {
       return;
     }
 
-    this.getActiveSortElement(active);
+    this.getActiveSortElement(active, active.dataset.order);
 
-    this.sort(active.dataset.id, this.activeOrder);
+    this.sort(active.dataset.id, active.dataset.order);
   };
 
-  sort(fieldValue, orderValue) {
+  getInitialSorting (fieldValue, orderValue) {
+    this.activeField = this.subElements.header.querySelector("[data-id=" + fieldValue + "]");
+    this.activeField.dataset.order = orderValue;
+    this.activeField.children[1].innerHTML = this.arrow;
+    this.sort(fieldValue, orderValue);
+  }
 
+  getActiveSortElement(active, orderValue = 'desc') {
+    if (this.activeField !== active) {
+      this.activeField.children[1].innerHTML = '';
+      this.activeField = active;
+      this.activeField.dataset.order = orderValue;
+      this.activeField.children[1].innerHTML = this.arrow;
+    } else {
+      this.activeField.dataset.order = orderValue !== 'desc' ? 'desc' : 'asc';
+    }
+  }
+
+  sort(fieldValue, orderValue) {
     const directions = {
       asc: 1,
       desc: -1
@@ -142,26 +157,6 @@ export default class SortableTable {
 
       case 'date':
         break;
-    }
-  }
-
-  getInitialSorting (fieldValue, orderValue) {
-    this.activeField = this.subElements.header.querySelector("[data-id=" + fieldValue + "]");
-    this.activeOrder = orderValue;
-    this.activeField.dataset.order = this.activeOrder;
-    this.activeField.children[1].innerHTML = this.arrow;
-    this.sort(fieldValue, orderValue);
-  }
-
-  getActiveSortElement(active) {
-    if (this.activeField !== active) {
-      this.activeField.children[1].innerHTML = '';
-      this.activeField = active;
-      this.activeField.dataset.order = this.activeOrder;
-      this.activeField.children[1].innerHTML = this.arrow;
-    } else {
-      this.activeOrder = this.activeOrder === 'asc' ? 'desc' : 'asc';
-      this.activeField.dataset.order = this.activeOrder;
     }
   }
 
