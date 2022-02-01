@@ -104,9 +104,9 @@ export default class SortableTable {
   }
 
   handleClick = event => {
-    const active = event.target.closest('.sortable-table__cell');
+    const active = event.target.closest('[data-sortable="true"]');
 
-    if (event.target.tagName !== 'SPAN' || active.dataset.sortable !== 'true') {
+    if (event.target.tagName !== 'SPAN' || !active) {
       return;
     }
 
