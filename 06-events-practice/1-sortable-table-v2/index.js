@@ -1,12 +1,13 @@
 export default class SortableTable {
   element;
-  subElements;
-  activeField;
-  arrow = `<span class="sort-arrow"></span>`;
+  subElements = {};
 
   constructor(headersConfig, {
     data = [],
-    sorted = {}
+    sorted = {
+      id: headerConfig.find(item => item.sortable).id,
+      order: 'asc'
+    }
   } = {}) {
     this.headerConfig = headersConfig;
     this.data = data;
@@ -17,13 +18,12 @@ export default class SortableTable {
 
   render() {
     const element = document.createElement('div');
+
+    this.sort(this.sorted.id, this.sorted.order);
+
     element.innerHTML = this.getTemplate();
     this.element = element.firstElementChild;
     this.subElements = this.getSubElements();
-
-    if (this.sorted.id && this.sorted.order) {
-      this.getInitialSorting(this.sorted.id, this.sorted.order);
-    }
 
     this.initEventListeners();
   }
@@ -57,10 +57,11 @@ export default class SortableTable {
   getHeaderItems() {
     if (this.headerConfig.length) {
       const headerItems = this.headerConfig.map(item => {
+        let order = this.sorted.id === item.id ? this.sorted.order : 'asc';
         return `
-          <div class="sortable-table__cell" data-id="${item.id}" data-sortable="${item.sortable}">
+          <div class="sortable-table__cell" data-id="${item.id}" data-sortable="${item.sortable}" data-order="${order}">
             <span>${item.title}</span>
-            <span data-element="arrow" class="sortable-table__sort-arrow"></span>
+            ${this.getSortingArrow(item.id)}
           </div>
         `;
       });
@@ -100,37 +101,34 @@ export default class SortableTable {
   }
 
   initEventListeners () {
-    this.subElements.header.addEventListener('click', this.handleClick);
+    this.subElements.header.addEventListener('pointerdown', this.handleClick);
   }
 
   handleClick = event => {
     const active = event.target.closest('[data-sortable="true"]');
 
-    if (event.target.tagName !== 'SPAN' || !active) {
+    if (!active) {
       return;
     }
 
-    this.getActiveSortElement(active, active.dataset.order);
+    const order = active.dataset.order === 'asc' ? 'desc' : 'asc';
+    active.dataset.order = order;
+    this.sort(active.dataset.id, order);
 
-    this.sort(active.dataset.id, active.dataset.order);
+    const arrow = active.querySelector('.sortable-table__sort-arrow');
+
+    if (!arrow) {
+      active.append(this.subElements.arrow);
+    }
+
+    this.subElements.body.innerHTML = this.getBodyItems();
   };
 
-  getInitialSorting (fieldValue, orderValue) {
-    this.activeField = this.subElements.header.querySelector("[data-id=" + fieldValue + "]");
-    this.activeField.dataset.order = orderValue;
-    this.activeField.children[1].innerHTML = this.arrow;
-    this.sort(fieldValue, orderValue);
-  }
 
-  getActiveSortElement(active, orderValue = 'desc') {
-    if (this.activeField !== active) {
-      this.activeField.children[1].innerHTML = '';
-      this.activeField = active;
-      this.activeField.dataset.order = orderValue;
-      this.activeField.children[1].innerHTML = this.arrow;
-    } else {
-      this.activeField.dataset.order = orderValue !== 'desc' ? 'desc' : 'asc';
-    }
+  getSortingArrow(id) {
+    return this.sorted.id === id ? `<span data-element="arrow" class="sortable-table__sort-arrow">
+          <span class="sort-arrow"></span>
+      </span>` : '';
   }
 
   sort(fieldValue, orderValue) {
@@ -148,7 +146,7 @@ export default class SortableTable {
 
     switch (sortType) {
       case 'string':
-        this.sortByStingValue(fieldValue, direction);
+        this.sortByStringValue(fieldValue, direction);
         break;
 
       case 'number':
@@ -160,7 +158,7 @@ export default class SortableTable {
     }
   }
 
-  sortByStingValue(fieldValue, direction) {
+  sortByStringValue(fieldValue, direction) {
     const sortedData = [...this.data].sort((a, b) => {
       return direction * a[fieldValue].localeCompare(b[fieldValue], ['ru', 'en'], {caseFirst: 'upper'});
     });
@@ -178,11 +176,14 @@ export default class SortableTable {
 
   update(newData) {
     this.data = newData;
-    this.subElements.body.innerHTML = this.getBodyItems();
+  }
+
+  remove() {
+    this.element.remove();
   }
 
   destroy() {
-    this.element.remove();
-    this.subElements.header.removeEventListener('click', this.handleClick);
+    this.remove();
+    this.subElements = {};
   }
 }
