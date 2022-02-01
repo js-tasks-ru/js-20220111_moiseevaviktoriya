@@ -79,7 +79,7 @@ export default class SortableTable {
     if (this.headerConfig.length) {
       const bodyItemData = this.headerConfig.map(item => {
         if (item.template) {
-          return item.template(product.images);
+          return item.template(product[item.id]);
         } else {
           return `
             <div class="sortable-table__cell">${product[item.id]}</div>
