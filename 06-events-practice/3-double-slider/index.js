@@ -3,23 +3,22 @@ export default class DoubleSlider {
   subElements = {};
   activeThumb;
   shiftX;
+  range;
 
   constructor({
-    min = 10,
-    max = 100,
+    min = 100,
+    max = 200,
     formatValue = ((data) => data),
     selected = {
-      from: min,
-      to: max
+      from: 120,
+      to: 150
     }
   } = {}) {
     this.min = min;
     this.max = max;
     this.formatValue = formatValue;
-    this.selected = {
-      from: selected.from,
-      to: selected.to
-    };
+    this.selected = selected;
+    this.range = max - min;
 
     this.render();
   }
@@ -59,11 +58,21 @@ export default class DoubleSlider {
   }
 
   getValues() {
-    const range = this.max - this.min;
-    const thumbLeftPosition = this.subElements.thumbLeft.style.left ? parseFloat(this.subElements.thumbLeft.style.left) : 0;
-    const thumbRightPosition = this.subElements.thumbRight.style.right ? parseFloat(this.subElements.thumbRight.style.right) : 0;
-    this.selected.from = Math.round(this.min + thumbLeftPosition * range / 100);
-    this.selected.to = Math.round(this.max - thumbRightPosition * range / 100);
+    const left = (this.selected.from - this.min) * 100 / this.range;
+    const right = 100 - (this.selected.to - this.min) * 100 / this.range;
+    this.subElements.progressBar.style.left = left + '%';
+    this.subElements.progressBar.style.right = right + '%';
+    this.subElements.thumbLeft.style.left = left + '%';
+    this.subElements.thumbRight.style.right = right + '%';
+    this.subElements.from.innerHTML = this.formatValue(this.selected.from);
+    this.subElements.to.innerHTML = this.formatValue(this.selected.to);
+  }
+
+  setValues() {
+    const thumbLeftPosition = parseFloat(this.subElements.thumbLeft.style.left);
+    const thumbRightPosition = parseFloat(this.subElements.thumbRight.style.right);
+    this.selected.from = Math.round(this.min + thumbLeftPosition * this.range / 100);
+    this.selected.to = Math.round(this.max - thumbRightPosition * this.range / 100);
     this.subElements.from.innerHTML = this.formatValue(this.selected.from);
     this.subElements.to.innerHTML = this.formatValue(this.selected.to);
   }
@@ -114,13 +123,13 @@ export default class DoubleSlider {
       this.activeThumb.style.right = this.shiftX + '%';
       this.subElements.progressBar.style.right = this.shiftX + '%';
     }
-    this.getValues();
-
+    this.setValues();
   };
 
 
   stopDragging = event => {
     document.removeEventListener("pointermove", this.dragging);
+    document.removeEventListener("pointerup", this.stopDragging);
     this.element.classList.remove('range-slider_dragging');
   };
 
