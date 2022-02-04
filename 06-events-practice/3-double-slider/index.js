@@ -10,8 +10,8 @@ export default class DoubleSlider {
     max = 200,
     formatValue = ((data) => data),
     selected = {
-      from: 120,
-      to: 150
+      from: min,
+      to: max
     }
   } = {}) {
     this.min = min;
