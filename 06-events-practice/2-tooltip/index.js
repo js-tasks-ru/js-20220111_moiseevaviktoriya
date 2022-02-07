@@ -1,21 +1,19 @@
-let instance;
-
 class Tooltip {
   element;
+  static instance;
 
   constructor() {
-    if (!instance) {
-      instance = this;
+    if (!Tooltip.instance) {
+      Tooltip.instance = this;
     }
     this.initialize();
     this.render();
-    return instance;
+    return Tooltip.instance;
   }
 
   render() {
     this.element = document.createElement('div');
     document.body.append(this.element);
-    //console.log(this.element)
   }
 
   initialize() {
@@ -30,27 +28,28 @@ class Tooltip {
       return;
     }
 
+    this.render();
+
     this.element.classList.add('tooltip');
     this.element.innerHTML = active.dataset.tooltip;
     document.addEventListener("pointermove", this.moveTooltip);
-  }
+  };
 
   moveTooltip = event => {
-    let shiftX = event.clientX;
-    let shiftY = event.clientY;
+    const shiftX = event.clientX;
+    const shiftY = event.clientY;
 
-    this.element.style.left = shiftX + 'px';
-    this.element.style.top = shiftY + 'px';
-  }
+    this.element.style.left = shiftX + 10 + 'px';
+    this.element.style.top = shiftY + 10 + 'px';
+  };
 
   hideTooltip = () => {
     document.removeEventListener("pointermove", this.moveTooltip);
     this.destroy();
-  }
+  };
 
   destroy() {
-    this.element.classList.remove('tooltip');
-    this.element.innerHTML = '';
+    this.element.remove();
   }
 }
 
