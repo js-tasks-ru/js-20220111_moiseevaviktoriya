@@ -1,5 +1,6 @@
 export default class SortableList {
   element;
+  active;
 
   constructor({items = []} = {}) {
     this.items = items;
@@ -25,6 +26,7 @@ export default class SortableList {
       this.items.forEach(item => {
         this.element.append(item);
         item.classList.add('sortable-list__item');
+        item.draggable = true;
       });
     }
   }
@@ -34,11 +36,55 @@ export default class SortableList {
   }
 
   startDragging = event => {
-    const active = event.target.closest('.sortable-list__item');
+    const activeGrabHandle = event.currentTarget.closest('[data-grab-handle]');
+    console.log(event);
 
-    if (!active) {
+    if (!this.active) {
       return;
     }
 
+    this.active = activeGrabHandle.parent;
+    console.log(this.active);
+    const width = this.active.clientWidth;
+
+    this.active.classList.add('sortable-list__item_dragging');
+    this.active.style.width = width + 'px';
+
+    this.active.addEventListener('dragover', this.dragging);
+    this.active.addEventListener('dragend', () => {
+      this.active.classList.remove('sortable-list__item_dragging');
+    });
+  }
+
+  dragging = event => {
+    event.preventDefault();
+    const currentElement = event.target;
+    const isMoveable = this.active !== currentElement && currentElement.classList.contains(`sortable-list__item`);
+
+    if (!isMoveable) {
+      return;
+    }
+
+    const nextElement = this.getNextElement(event.clientY, currentElement);
+
+    if (
+      nextElement &&
+      this.active === nextElement.previousElementSibling ||
+      this.active === nextElement
+    ) {
+      return;
+    }
+    this.element.insertBefore(this.active, nextElement);
+  }
+
+  getNextElement (cursorPosition, currentElement) {
+    const currentElementCoord = currentElement.getBoundingClientRect();
+    const currentElementCenter = currentElementCoord.y + currentElementCoord.height / 2;
+
+    const nextElement = (cursorPosition < currentElementCenter) ?
+      currentElement :
+      currentElement.nextElementSibling;
+
+    return nextElement;
   }
 }
