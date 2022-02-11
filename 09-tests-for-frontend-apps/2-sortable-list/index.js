@@ -16,7 +16,6 @@ export default class SortableList {
     element.innerHTML = this.getTemplate();
     this.element = element.firstElementChild;
     this.getList();
-    this.elements = this.element.querySelectorAll('.sortable-list__item')
     this.initEventListeners();
   }
 
@@ -42,22 +41,23 @@ export default class SortableList {
 
   initAction = (event) => {
     const activeGrab = event.target.closest('[data-grab-handle]');
-    const activeDelete = event.target.closest('[data-grab-delete]');
+    const activeDelete = event.target.closest('[data-delete-handle]');
+
 
     if (!activeGrab && !activeDelete) {
       return;
     }
     this.active = event.target.parentNode;
+    this.elements = this.element.querySelectorAll('.sortable-list__item');
 
     activeGrab ? this.startDragging(event) : this.delete();
+  };
 
+  startDragging = (event) => {
     this.active.addEventListener('dragstart', (event) => {
       event.preventDefault();
     });
 
-  };
-
-  startDragging = (event) => {
     this.width = this.active.clientWidth;
     this.height = this.active.clientHeight;
 
@@ -71,12 +71,12 @@ export default class SortableList {
 
     this.dragAt(event.pageY);
 
-    this.active.addEventListener('dragstart', () => {
+    document.addEventListener('dragstart', () => {
       return false;
     });
 
-    this.element.addEventListener('pointerover', this.drag);
-    this.active.addEventListener('pointerup', this.drop);
+    document.addEventListener('pointerover', this.drag);
+    document.addEventListener('pointerup', this.drop);
   };
 
   drag = event => {
@@ -94,7 +94,6 @@ export default class SortableList {
 
       if (this.active !== element && this.isIntersecting(activeStartY, activeEndY, elemStartY, elemEndY)) {
         if (Math.abs(activeStartY - elemStartY) < this.height / 2) {
-
           this.changeSorting(element, index);
         }
       }
@@ -107,22 +106,31 @@ export default class SortableList {
   }
 
   changeSorting(element, index) {
-    const currIndex = [...this.element.children].indexOf(this.placeholder);
+    const currIndex = [...this.element.children].indexOf(this.active);
     const el1 = currIndex > index ? this.placeholder : element;
     const el2 = currIndex > index ? element : this.placeholder;
     this.element.insertBefore(el1, el2);
   }
 
   drop = () => {
-    this.element.removeEventListener('pointerover', this.drag);
-    this.element.insertBefore(this.active, this.placeholder);
-    this.active.style.top = 'unset';
-    this.placeholder.remove();
-    this.active.classList.remove('sortable-list__item_dragging');
+    document.removeEventListener('pointerover', this.drag);
+    if (this.active) {
+      this.element.insertBefore(this.active, this.placeholder);
+      this.active.style.top = 'unset';
+
+      this.placeholder.remove();
+      this.active.classList.remove('sortable-list__item_dragging');
+      this.active = null;
+    }
   };
 
   dragAt(pageY) {
     this.active.style.top = pageY - this.active.offsetHeight / 2 + 'px';
+  }
+
+  delete() {
+    this.active.remove();
+    this.active = null;
   }
 
   remove() {
@@ -134,5 +142,4 @@ export default class SortableList {
     this.placeholder = null;
     this.active = null;
   }
-
 }
