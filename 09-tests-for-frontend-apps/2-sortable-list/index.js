@@ -47,7 +47,8 @@ export default class SortableList {
     if (!activeGrab && !activeDelete) {
       return;
     }
-    this.active = event.target.parentNode;
+
+    this.active = event.target.closest('.sortable-list__item');
     this.elements = this.element.querySelectorAll('.sortable-list__item');
 
     activeGrab ? this.startDragging(event) : this.delete();
@@ -64,12 +65,12 @@ export default class SortableList {
     this.active.classList.add('sortable-list__item_dragging');
     this.active.style.width = this.width + 'px';
 
-    this.placeholder = document.createElement('li');
+    this.placeholder = document.createElement('div');
     this.placeholder.className = 'sortable-list__placeholder';
     this.placeholder.style.height = this.height + 'px';
     this.element.insertBefore(this.placeholder, this.active);
 
-    this.dragAt(event.pageY);
+    this.dragAt(event.clientY);
 
     document.addEventListener('dragstart', () => {
       return false;
@@ -81,7 +82,7 @@ export default class SortableList {
 
   drag = event => {
     event.preventDefault();
-    this.dragAt(event.pageY);
+    this.dragAt(event.clientY);
 
     const pos = this.active.getBoundingClientRect();
     const activeStartY = pos.y;
@@ -124,8 +125,8 @@ export default class SortableList {
     }
   };
 
-  dragAt(pageY) {
-    this.active.style.top = pageY - this.active.offsetHeight / 2 + 'px';
+  dragAt(clientY) {
+    this.active.style.top = clientY - this.active.offsetHeight / 2 + 'px';
   }
 
   delete() {
