@@ -16,12 +16,13 @@ export default class ProductForm {
 
   async render() {
     const element = document.createElement('div');
-    this.categories = await this.loadCategories();
+    const categoriesPromise = this.loadCategories();
+    const productPromise = this.productId ? this.loadData() : [];
 
-    if (this.productId) {
-      const data = await this.loadData();
-      this.data = data[0];
-    }
+    const [categoriesData, productsData] = await Promise.all([categoriesPromise, productPromise]);
+
+    this.categories = categoriesData;
+    this.data = productsData[0];
 
     element.innerHTML = this.getTemplate();
     this.element = element;
