@@ -158,6 +158,4 @@ export default class Page {
     this.element.remove();
     this.rangePicker.element.removeEventListener('date-select', this.updateData);
   }
-
-
 }
